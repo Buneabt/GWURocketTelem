@@ -42,7 +42,14 @@ void setup()
   rf69.setEncryptionKey(key);
   if(rf69.init() & rf69.setFrequency(433.0))
     Serial.println("Initialized and Freq 433 found.S");
-
+#if 0
+  // For compat with RFM69 Struct_send
+  rf69.setModemConfig(RH_RF69::GFSK_Rb250Fd250);
+  rf69.setPreambleLength(3);
+  uint8_t syncwords[] = { 0x2d, 0x64 };
+  rf69.setSyncWords(syncwords, sizeof(syncwords));
+  rf69.setEncryptionKey((uint8_t*)"thisIsEncryptKey");
+#endif
 }
 
 void loop()
@@ -61,7 +68,7 @@ void loop()
 //      Serial.println(rf69.lastRssi(), DEC);
       
       // Send a reply
-      uint8_t data[] = "Kill Yourself";
+      uint8_t data[] = "Test F";
       rf69.send(data, sizeof(data));
       rf69.waitPacketSent();
       Serial.println("Sent a reply");
