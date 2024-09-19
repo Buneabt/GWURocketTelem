@@ -12,6 +12,19 @@ const unsigned long TRANSMISSION_INTERVAL = 5000; // 5 seconds in milliseconds
 unsigned long missionStartTime;
 unsigned long lastTransmissionTime = 0;
 
+String data_ready = "";
+
+String readExternalData() {
+  //Format our data here ready for transmit.
+  
+  return String(dataBuffer);
+}
+
+
+
+
+
+
 void setup() 
 {
   Serial.begin(9600);
@@ -48,9 +61,12 @@ void loop()
     // Calculate mission time
     unsigned long missionTime = (currentTime - missionStartTime) / 1000; // Convert to seconds
     
+
+    data_ready = readExternalData();
+
     // Prepare the message
     char message[RH_RF69_MAX_MESSAGE_LEN];
-    snprintf(message, sizeof(message), "%s+%lu+HelloWorld<EOM>", CALLSIGN, missionTime);
+    snprintf(message, sizeof(message), "%s+%lu+%s<EOM>", CALLSIGN, missionTime, data_ready.c_str());
     
     Serial.print("Sending: ");
     Serial.println(message);
