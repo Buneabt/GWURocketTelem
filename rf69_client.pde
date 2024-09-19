@@ -5,7 +5,7 @@
 RH_RF69 rf69(8, 7); // Adafruit Feather 32u4
 
 // Constants
-const char* CALLSIGN = "YOURCALL"; // Replace with your actual callsign
+const char* CALLSIGN = "KQ4NPQ"; // Replace with your actual callsign
 const unsigned long TRANSMISSION_INTERVAL = 5000; // 5 seconds in milliseconds
 
 // Variables
@@ -15,8 +15,8 @@ unsigned long lastTransmissionTime = 0;
 void setup() 
 {
   Serial.begin(9600);
-  while (!Serial) 
-    ;
+  while (!Serial)
+  ;
   delay(250);
 
   if (!rf69.init())
@@ -28,9 +28,6 @@ void setup()
   // If you are using a high power RF69 eg RFM69HW, you *must* set a Tx power with the
   // ishighpowermodule flag set like this:
   //rf69.setTxPower(14, true);
-
-  if(rf69.init() & rf69.setFrequency(433.0))
-    Serial.println("Initialized and Freq 433 found.");
 
   // The encryption key has to be the same as the one in the server
   uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
