@@ -5,8 +5,8 @@
 RH_RF69 rf69(8, 7); // Adafruit Feather 32u4
 
 // Constants
-const char* CALLSIGN = "KQ4NPQ"; // Replace with your actual callsign
-const unsigned long TRANSMISSION_INTERVAL = 5000; // 5 seconds in milliseconds
+const char* CALLSIGN = "KQ4NPQ"; 
+const unsigned long TRANSMISSION_INTERVAL = 5000; 
 
 // Variables
 unsigned long missionStartTime;
