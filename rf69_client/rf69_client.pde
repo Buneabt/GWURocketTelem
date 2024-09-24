@@ -17,7 +17,7 @@ String data_ready = "";
 String readExternalData() {
   //Format our data here ready for transmit.
   
-  return String(dataBuffer);
+  return String("Test");
 }
 
 
