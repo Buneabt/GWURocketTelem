@@ -61,7 +61,6 @@ void loop()
     // Calculate mission time
     unsigned long missionTime = (currentTime - missionStartTime) / 1000; // Convert to seconds
     
-
     data_ready = readExternalData();
 
     // Prepare the message
