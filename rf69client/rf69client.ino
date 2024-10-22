@@ -1,14 +1,14 @@
 #include <SPI.h>
-#include <RH_RF69.h>
+#include <RH_RF95.h>
 
-#define RFM69_CS      8
-#define RFM69_INT     7
-#define RFM69_RST     4
+#define RFM95_CS      8
+#define RFM95_INT     7
+#define RFM95_RST     4
 #define LED           13
 
-#define RF69_FREQ 433.0
+#define RF95_FREQ 915.0
 
-RH_RF69 rf69(RFM69_CS, RFM69_INT);
+RH_RF95 rf95;
 
 const char* CALLSIGN = "KQ4NPQ";
 unsigned long missionStartTime;
@@ -21,29 +21,29 @@ void setup()
   while (!Serial) { delay(1); }
 
   pinMode(LED, OUTPUT);     
-  pinMode(RFM69_RST, OUTPUT);
-  digitalWrite(RFM69_RST, LOW);
+  pinMode(RFM95_RST, OUTPUT);
+  digitalWrite(RFM95_RST, LOW);
 
 
   // Manual reset
-  digitalWrite(RFM69_RST, HIGH);
+  digitalWrite(RFM95_RST, HIGH);
   delay(10);
-  digitalWrite(RFM69_RST, LOW);
+  digitalWrite(RFM95_RST, LOW);
   delay(10);
   
-  if (!rf69.init()) {
+  if (!rf95.init()) {
     Serial.println("RFM69 radio init failed");
     while (1);
   }
   Serial.println("RFM69 radio init OK!");
   
-  if (!rf69.setFrequency(RF69_FREQ)) {
+  if (!rf95.setFrequency(RF95_FREQ)) {
     Serial.println("setFrequency failed");
   }
 
-  rf69.setTxPower(20, true);  // Range from 14-20 for power, 2nd arg must be true for 69HCW
+  rf95.setTxPower(20, true);  // Range from 14-20 for power, 2nd arg must be true for 69HCW
 
-  Serial.print("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(" MHz");
+  Serial.print("RF95 radio @");  Serial.print((int)RF95_FREQ);  Serial.println(" MHz");
 
   missionStartTime = millis();
 }
@@ -58,14 +58,14 @@ void loop() {
     
     String data = "Test Data"; // Replace with actual data collection function
 
-    char message[RH_RF69_MAX_MESSAGE_LEN];
+    char message[RH_RF95_MAX_MESSAGE_LEN];
     snprintf(message, sizeof(message), "%s+%lu+%s<EOM>", CALLSIGN, missionTime, data.c_str());
     
     Serial.print("Sending: ");
     Serial.println(message);
     
-    rf69.send((uint8_t*)message, strlen(message));
-    rf69.waitPacketSent();
+    rf95.send((uint8_t*)message, strlen(message));
+    rf95.waitPacketSent();
     
     Serial.println("Message sent");
 
