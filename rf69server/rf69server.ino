@@ -1,87 +1,72 @@
+// rf95_server.pde for Adafruit Feather RP2040 RFM
 #include <SPI.h>
 #include <RH_RF95.h>
 
-#define RFM95_CS      8
-#define RFM95_INT     7
-#define RFM95_RST     4
-#define LED           13
+// Pin definitions for Feather RP2040 RFM
+#define RFM95_CS   16    // "B" pin on RFM boards
+#define RFM95_INT  21    // "A" pin on RFM boards
+#define RFM95_RST  17    // "C" pin on RFM boards
+#define LED        13    // Built-in LED
 
-#define RF95_FREQ 915
-
+// Singleton instance of the radio driver
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 void setup() 
 {
-  Serial.begin(115200);
-  while (!Serial) { delay(1); }
-
-  pinMode(LED, OUTPUT);     
+  // Set up GPIO pins
+  pinMode(LED, OUTPUT);
   pinMode(RFM95_RST, OUTPUT);
+  
+  // Manual reset the radio
   digitalWrite(RFM95_RST, LOW);
-
-
-  // Manual reset
+  delay(10);
   digitalWrite(RFM95_RST, HIGH);
   delay(10);
-  digitalWrite(RFM95_RST, LOW);
-  delay(10);
+
+  Serial.begin(9600);
+  while (!Serial) delay(100); // Wait for serial port to be available
   
-  if (!rf95.init()) {
-    Serial.println("RFM95 radio init failed");
-    while (1);
-  }
-  Serial.println("RFM95 radio init OK!");
+  if (!rf95.init())
+    Serial.println("init failed");
+  Serial.println("init success");
   
-  if (!rf95.setFrequency(RF95_FREQ)) {
+  // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
+
+  // Set frequency to match your region (915.0 for US)
+  if (!rf95.setFrequency(915.0)) {
     Serial.println("setFrequency failed");
   }
 
-  rf95.setTxPower(20, true);
-
-  Serial.print("RFM95 radio @");  Serial.print((int)RF95_FREQ);  Serial.println(" MHz");
-  Serial.println("Waiting for messages...");
+  // The default transmitter power is 13dBm, using PA_BOOST.
+  // Set transmitter power to 20 dBm, using PA_BOOST
+  rf95.setTxPower(20, false);
 }
 
-void loop() {
-  if (rf95.available()) {
+void loop()
+{
+  if (rf95.available())
+  {
+    // Should be a message for us now   
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
-    
-    if (rf95.recv(buf, &len)) {
-      if (!len) return;
-      buf[len] = 0; // Null terminate the string
-      
-      Serial.print("Received: ");
+    if (rf95.recv(buf, &len))
+    {
+      digitalWrite(LED, HIGH);  // Turn on LED to show received packet
+      Serial.print("got request: ");
       Serial.println((char*)buf);
       Serial.print("RSSI: ");
       Serial.println(rf95.lastRssi(), DEC);
-
-      // Parse the received message
-      char* callsign = strtok((char*)buf, "+");
-      char* missionTime = strtok(NULL, "+");
-      char* data = strtok(NULL, "<EOM>");
-
-      if (callsign && missionTime && data) {
-        Serial.print("Callsign: ");
-        Serial.println(callsign);
-        Serial.print("Mission Time: ");
-        Serial.println(missionTime);
-        Serial.print("Data: ");
-        Serial.println(data);
-      }
-
-      Blink(LED, 40, 3); // Blink LED 3 times, 40ms between blinks
-    } else {
-      Serial.println("Receive failed");
+      
+      // Send a reply
+      uint8_t data[] = "And hello back to you";
+      rf95.send(data, sizeof(data));
+      rf95.waitPacketSent();
+      Serial.println("Sent a reply");
+      digitalWrite(LED, LOW);  // Turn off LED
     }
-  }
-}
-
-void Blink(byte PIN, byte DELAY_MS, byte loops) {
-  for (byte i=0; i<loops; i++)  {
-    digitalWrite(PIN,HIGH);
-    delay(DELAY_MS);
-    digitalWrite(PIN,LOW);
-    delay(DELAY_MS);
+    else
+    {
+      Serial.println("recv failed");
+    }
   }
 }
