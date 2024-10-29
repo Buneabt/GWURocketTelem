@@ -1,83 +1,84 @@
+// rf95_client.pde for Adafruit Feather RP2040 RFM
+// -*- mode: C++ -*-
+
 #include <SPI.h>
 #include <RH_RF95.h>
 
-#define RFM95_CS      8
-#define RFM95_INT     7
-#define RFM95_RST     4
-#define LED           13
+// Pin definitions for Feather RP2040 RFM
+#define RFM95_CS   16    // "B" pin on RFM boards
+#define RFM95_INT  21    // "A" pin on RFM boards
+#define RFM95_RST  17    // "C" pin on RFM boards
+#define LED        13    // Built-in LED
 
-#define RF95_FREQ 915.0
-
-RH_RF95 rf95;
-
-const char* CALLSIGN = "KQ4NPQ";
-unsigned long missionStartTime;
-unsigned long lastTransmissionTime = 0;
-const unsigned long TRANSMISSION_INTERVAL = 5000; // 5 seconds
+// Singleton instance of the radio driver
+RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 void setup() 
 {
-  Serial.begin(115200);
-  while (!Serial) { delay(1); }
-
-  pinMode(LED, OUTPUT);     
+  pinMode(LED, OUTPUT);
   pinMode(RFM95_RST, OUTPUT);
+  
+  // Manual reset the radio
   digitalWrite(RFM95_RST, LOW);
-
-
-  // Manual reset
+  delay(10);
   digitalWrite(RFM95_RST, HIGH);
   delay(10);
-  digitalWrite(RFM95_RST, LOW);
-  delay(10);
+
+  Serial.begin(9600);
+  while (!Serial) delay(100);  // Wait for serial console
   
   if (!rf95.init()) {
-    Serial.println("RFM69 radio init failed");
+    Serial.println("RF95 init failed");
     while (1);
   }
-  Serial.println("RFM69 radio init OK!");
-  
-  if (!rf95.setFrequency(RF95_FREQ)) {
+  Serial.println("RF95 init OK!");
+
+  // Set frequency - must match the server
+  if (!rf95.setFrequency(915.0)) {
     Serial.println("setFrequency failed");
+    while (1);
   }
-
-  rf95.setTxPower(20, true);  // Range from 14-20 for power, 2nd arg must be true for 69HCW
-
-  Serial.print("RF95 radio @");  Serial.print((int)RF95_FREQ);  Serial.println(" MHz");
-
-  missionStartTime = millis();
-}
-
-void loop() {
-  unsigned long currentTime = millis();
   
-  if (currentTime - lastTransmissionTime >= TRANSMISSION_INTERVAL) {
-    lastTransmissionTime = currentTime;
-    
-    unsigned long missionTime = (currentTime - missionStartTime) / 1000; // Convert to seconds
-    
-    String data = "Test Data"; // Replace with actual data collection function
-
-    char message[RH_RF95_MAX_MESSAGE_LEN];
-    snprintf(message, sizeof(message), "%s+%lu+%s<EOM>", CALLSIGN, missionTime, data.c_str());
-    
-    Serial.print("Sending: ");
-    Serial.println(message);
-    
-    rf95.send((uint8_t*)message, strlen(message));
-    rf95.waitPacketSent();
-    
-    Serial.println("Message sent");
-
-    Blink(LED, 50, 3); // Blink LED 3 times, 50ms between blinks
-  }
+  // Defaults after init are 434.0MHz, 13dBm, Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
+  rf95.setTxPower(23, false);  // Set to 23 dBm for maximum range
 }
 
-void Blink(byte PIN, byte DELAY_MS, byte loops) {
-  for (byte i=0; i<loops; i++)  {
-    digitalWrite(PIN,HIGH);
-    delay(DELAY_MS);
-    digitalWrite(PIN,LOW);
-    delay(DELAY_MS);
+void loop()
+{
+  Serial.println("Sending to rf95_server");
+  digitalWrite(LED, HIGH);
+  
+  // Send a message to rf95_server
+  uint8_t data[] = "Hello World!";
+  rf95.send(data, sizeof(data));
+  
+  rf95.waitPacketSent();
+  digitalWrite(LED, LOW);
+  
+  // Now wait for a reply
+  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+  uint8_t len = sizeof(buf);
+
+  if (rf95.waitAvailableTimeout(3000))
+  { 
+    if (rf95.recv(buf, &len))
+    {
+      digitalWrite(LED, HIGH);
+      Serial.print("Got reply: ");
+      Serial.println((char*)buf);
+      Serial.print("RSSI: ");
+      Serial.println(rf95.lastRssi(), DEC);    
+      digitalWrite(LED, LOW);
+    }
+    else
+    {
+      Serial.println("Receive failed");
+    }
   }
+  else
+  {
+    Serial.println("No reply, is rf95_server running?");
+  }
+  
+  delay(2000);  // Wait 2 seconds before next transmission
 }
