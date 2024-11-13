@@ -5,11 +5,11 @@ downlink system for real time telemetry.
 
 Action items below:
 
-  [X] Connection Between boards 
-  [X] Maintain solid RSSI numbers < 50 dB 
-  [X] Read from CSV
-  [ ] Attach new antenna to the Client Board (Rocket) 
-  [ ] Connect with real data collection system to perform compatibility test
+  [X] Connection Between boards <br/>
+  [X] Maintain solid RSSI numbers < 50 dB <br/>
+  [X] Read from CSV <br/>
+  [ ] Attach new antenna to the Client Board (Rocket) <br/>
+  [ ] Connect with real data collection system to perform compatibility test <br/>
 
 
 How to run this code:
