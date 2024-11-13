@@ -5,9 +5,9 @@ downlink system for real time telemetry.
 
 Action items below:
 
-  [] Connection Between boards
-  [] Maintain solid RSSI numbers < 50 dB
-  [] Attach new antenna to the Client Board (Rocket)
+  [] Connection Between boards \n
+  [] Maintain solid RSSI numbers < 50 dB \n
+  [] Attach new antenna to the Client Board (Rocket) \n
   [] 
 
 
