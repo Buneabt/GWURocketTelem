@@ -21,8 +21,8 @@ How to run this code:
     - RH_RF95 (Radiohead)
 
 1. Install proper Arduino IDE and Compiler
-2. Upload 'Client' code to your desired ground station board.
-3. Upload 'Server' to rocket RP2040
+2. Upload 'ground' code to your desired ground station board.
+3. Upload 'server' to rocket RP2040
 4. Upload 'Main' to Raspberry Pico
 5. Run Main
 
