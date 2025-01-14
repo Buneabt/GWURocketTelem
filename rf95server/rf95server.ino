@@ -4,7 +4,6 @@
 #define RFM95_CS   16
 #define RFM95_INT  21
 #define RFM95_RST  17
-<<<<<<< HEAD
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
@@ -120,4 +119,3 @@ void loop() {
   
   delay(10);
 }
->>>>>>> 03f7627ffd4e02408355441b067dca90b71772ad
