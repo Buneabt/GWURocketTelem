@@ -17,7 +17,6 @@ Action items below:
 
 How to run this code:
   - Libraries required:
-    - SD
     - SPI
     - RH_RF95 (Radiohead)
 
